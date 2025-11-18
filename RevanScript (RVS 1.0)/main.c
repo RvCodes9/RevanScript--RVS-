@@ -1,5 +1,7 @@
 /*
 
+Copyright © Rəvan Babayev All rights reserved.
+
 RevanScript (RVS) Programming language
 RevanScript interpreter C source codes
 
