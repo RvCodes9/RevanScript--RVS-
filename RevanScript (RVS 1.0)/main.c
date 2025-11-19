@@ -8,13 +8,40 @@ RevanScript interpreter C source codes
 */
 
 
-
 #include <stdio.h> // Standart input/output kitabxanasıdır (printf, fgets, puts, putchar) kimi funksiyalar üçün lazımdır.
 #include <stdlib.h> // Standart Library kitabxanasıdır (malloc, calloc, realloc, free, system) kimi yaddaş ı dinamik idarə edə bilmək üçün lazım olan funksiyalar var.
 #include <stdbool.h> // Standart Boolean kitabxanasıdır (true, false) daha rahat (1, 0) anlamını oxunaqlı hala gətirmək üçündür.
 #include <stddef.h> // Standart Define kitabxanasıdır (size_t) kimi içində bəzi məlumat tipləri var.
 #include <string.h> // String algorithms / alqoritimləri var.
 #include <stdint.h> // Standart Integer kitabxanasıdır (int8_t, int16_t, int32_t, int64_t) kimi məlumat tipləri var.
+
+
+
+// Əgər Əməliyyat sistemi Windows-dursa konsolda yazıları rəngli olması üçün konsolda xüsusi aktivləşdirmə edirəm.
+#ifdef _WIN32
+
+#include <windows.h> // Windows kitabxanası WinAPI dır o bizə windows üzərində işlər görməyə imkan verir.
+
+void CONSOLE_COLOR_ACTIVE(){
+
+    HANDLE h0ut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(h0ut, &dwMode);
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(h0ut, dwMode);
+
+}
+
+#endif
+
+
+// Konsola rəngli yazı çıxarmaq üçün kodlar
+#define RESET "\033[0m"    // 0
+#define BLUE "\033[34m"    // 1
+#define RED "\033[31m"     // 2
+#define GREEN "\033[32m"   // 3
+#define YELLOW "\033[33m"  // 4
+#define WHITE "\033[37m"   // 5
 
 
 
@@ -378,6 +405,42 @@ bool PLN_KEYWORD(char* code){
 }
 
 
+
+bool COL_KEYWORD(char* code){
+
+    if (code[0] == 'c' && code[1] == 'o' && code[2] == 'l' && code[3] == ' '){
+
+        #ifdef _WIN32
+        CONSOLE_COLOR_ACTIVE();
+        #endif
+        
+        for (int i = 4; code[i] != ';'; i++){
+
+            switch (code[i]){
+
+                case '0' : printf("%s", RESET); break;
+                case '1' : printf("%s", BLUE); break;
+                case '2' : printf("%s", RED); break;
+                case '3' : printf("%s", GREEN); break;
+                case '4' : printf("%s", YELLOW); break;
+                case '5' : printf("%s", WHITE); break;
+
+                default : break;
+
+            }
+
+        }
+
+        return true;
+    }
+
+    else{
+        return false;
+    }
+}
+
+
+
 static bool cli_pause_mode = true;
 
 
@@ -470,6 +533,12 @@ bool RUNTIME(FILE* ScriptFile){
                 free(code);
                 continue;
             }
+            
+            // col açar sözü terminalda yazını rəngli etmək üçündür.
+            else if (COL_KEYWORD(code) == true){
+                free(code);
+                continue;
+            }
 
             // end açar sözü pause modunu deaktiv edir.
             else if (END_KEYWORD(code) == true){
@@ -490,6 +559,7 @@ bool RUNTIME(FILE* ScriptFile){
     // Ekranın proqram bitən kimi bağlanmasını əngəlləyir.
     if (cli_pause_mode == true){
         printf("\n");
+        printf("%s", RESET);
         system("pause");
     }
     
