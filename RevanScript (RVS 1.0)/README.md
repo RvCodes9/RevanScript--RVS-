@@ -5,7 +5,7 @@ Kod açıqdır və dəyişdirilə bilər, amma kommersiya məqsədilə paylaşma
 ----------------------------------
 Nümunə açar sözlər (RVS)
 
-out (output) - ekarana çıxış vermək üçün dür yazı çap etdirmək.
+out (output) - ekarana dəyişənin dəyərini çıxış vermək üçün dür.
 
 inp (input) - klaviyaturadan məlumat almaq üçün əsas açar sözdür.
 
