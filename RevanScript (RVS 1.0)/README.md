@@ -26,16 +26,19 @@ Hazır executable.cmd faylı ilə çox asan bir şəkildə executable fayl yarad
 Nümunə kodlar
 
  * Nümunə 1
-   var text; -> text dəyişəni yaradır və NULL məlumat daxil edilir.
-   inp text; -> klaviyaturadan text dəyişəninə məlumat yazırıq.
-   out text; -> text dəyişənin dəyərini ekrana çap edir.
+
+var text; -> text dəyişəni yaradır və NULL məlumat daxil edilir.
+inp text; -> klaviyaturadan text dəyişəninə məlumat yazırıq.
+out text; -> text dəyişənin dəyərini ekrana çap edir.
 
 * Nümunə 2
-  prt "Hello, World"; -> Ekrana Hello, World sözü çap edilir.
+
+prt "Hello, World"; -> Ekrana Hello, World sözü çap edilir.
 
 
 * Nümunə 3
-   end; -> Terminalı pause rejimindən çıxarıb sonlandırır proqramı.
+
+  end; -> Terminalı pause rejimindən çıxarıb sonlandırır proqramı.
 
 
 -------------------------------------
