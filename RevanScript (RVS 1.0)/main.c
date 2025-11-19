@@ -8,12 +8,18 @@ RevanScript interpreter C source codes
 */
 
 
-#include <stdio.h> // Standart input/output kitabxanasıdır (printf, fgets, putchar) kimi funksiyalar üçün lazımdır.
+#include <stdio.h> // Standart input/output kitabxanasıdır (printf, fgets, puts, putchar) kimi funksiyalar üçün lazımdır.
 #include <stdlib.h> // Standart Library kitabxanasıdır (malloc, calloc, realloc, free, system) kimi yaddaş ı dinamik idarə edə bilmək üçün lazım olan funksiyalar var.
 #include <stdbool.h> // Standart Boolean kitabxanasıdır (true, false) daha rahat (1, 0) anlamını oxunaqlı hala gətirmək üçündür.
 #include <stddef.h> // Standart Define kitabxanasıdır (size_t) kimi içində bəzi məlumat tipləri var.
 #include <string.h> // String algorithms / alqoritimləri var.
+#include <stdint.h> // Standart Integer kitabxanasıdır (int8_t, int16_t, int32_t, int64_t) kimi məlumat tipləri var.
 
+
+#define VARIABLE_NAME_MAX_COUNT 100 // Dəyişənin maksimum sayı
+#define VARIABLE_DATA_MAX_COUNT 100 // Dəyişəndəki məlumatın sayı
+#define VARIABLE_NAME_MAX_LENGHT 100 // Dəyişən adının uzunluğu
+#define VARIABLE_DATA_MAX_LENGHT 100 // Dəyişəndəki məlumatın uzunluğu
 
 
 bool ARG_CONTROL(int argc, char** argv){
@@ -23,32 +29,34 @@ bool ARG_CONTROL(int argc, char** argv){
         size_t arglen = strlen(argv[1]);
 
         char example[4] = ".rvs";
-        short example_count = 0;
+        int8_t example_counter = 0;
             
         for (int i = (arglen - 4); i < arglen; i++){
-            if (example[example_count++] != argv[1][i]) return false;
+            if (example[example_counter++] != argv[1][i]) return false;
         }
 
         return true;
     }  
     
-    else return false;
+    else{
+        return false;
+    }
 }
 
 
 
-static char variables_name_list[100][100];
-static char variables_data_list[100][100];
+static char variables_name_list[VARIABLE_NAME_MAX_COUNT][VARIABLE_NAME_MAX_LENGHT];
+static char variables_data_list[VARIABLE_DATA_MAX_COUNT][VARIABLE_DATA_MAX_LENGHT];
 
 static int variables_list_counter = 0;
 
 
 
-void VAR_KEYWORD(char* code){
+bool VAR_KEYWORD(char* code){
 	
-	if (code[0] == 'v' && code[1] == 'a' && code[2] == 'r'){
+	if (code[0] == 'v' && code[1] == 'a' && code[2] == 'r' && code[3] == ' '){
 		
-		int i = 3;
+		int i = 4;
 		
 		int n_counter = 0;
 		int d_counter = 0;
@@ -112,113 +120,98 @@ void VAR_KEYWORD(char* code){
         // Sonuna NULL TERMINATOR CHARACTER qoyulur (\0)
 		variables_name_list[variables_list_counter][n_counter] = '\0';
 		variables_data_list[variables_list_counter][d_counter] = '\0';
-		
+
 		variables_list_counter++;
+
+        return true;
 	}
+    
+    else{
+        return false;
+    }
 }
 
 
-void OUT_KEYWORD(char* code){
+bool OUT_KEYWORD(char* code){
 
-    if (code[0] == 'o' && code[1] == 'u' && code[2] == 't'){
-
-        // String literal
-
-        bool string_literal_active = false;
-        int count = 3;
+    if (code[0] == 'o' && code[1] == 'u' && code[2] == 't' && code[3] == ' '){
         
-        bool variable_call_active = false;
+        // Variable Name Write Buffer
+
+        int counter = 4;
+
         char variable_name_buffer[100];
         int variable_name_buffer_counter = 0;
-        
+
         while (true){
         	
-        	if ((string_literal_active == false) && (code[count] == ';')){
+        	if (code[counter] == ';'){
         		break;
 			}
 			
-			else if ((string_literal_active == false) && (code[count] == ' ')){
-				count++;
+			else if (code[counter] == ' '){
+				counter++;
 				continue;
-			}
-        	
-            else if (code[count] == '"'){
-
-                if (string_literal_active == true) 
-                    string_literal_active = false;
-                
-                else {
-                    string_literal_active = true;
-                }
-            }
-            
-            else if (string_literal_active == true){
-                if (code[count] == '%') putchar('\n');
-                else if (code[count] == '#') putchar('\t');
-                else putchar(code[count]);
             }
             
             else{
-
-                if (variable_call_active == false){
-                    variable_call_active = true;
-                }
-
-                variable_name_buffer[variable_name_buffer_counter++] = code[count];
+                variable_name_buffer[variable_name_buffer_counter++] = code[counter++];
             }
-            
-            count++;
         }
 
-        if (variable_call_active == true){
+        variable_name_buffer[variable_name_buffer_counter] = '\0';
 
-            variable_name_buffer[variable_name_buffer_counter] = '\0';
+        // Variable Data Print System
 
-            int i = 0;
+        for (int i = 0; i < variables_list_counter; i++){
 
-            for (i ; i < variables_list_counter; i++){
+            int variable_name_control_count = 0;
 
-                int variable_name_control_count = 0;
+            for (int j = 0; variable_name_buffer[j] != '\0'; j++){
+                if (variable_name_buffer[j] == variables_name_list[i][j]){
+                    variable_name_control_count++;
+                }
+            }
 
-                for (int j = 0; variables_name_list[i][j] != '\0'; j++){
-                    if (variable_name_buffer[j] == variables_name_list[i][j]){
-                        variable_name_control_count++;
+            if (strlen(variable_name_buffer) == variable_name_control_count){
+                
+                for (int j = 0; variables_data_list[i][j] != '\0'; j++){
+
+                    if (variables_data_list[i][j] == '%'){
+                        putchar('\n');
+                    }
+
+                    else if (variables_data_list[i][j] == '#'){
+                        putchar('\t');
+                    }
+
+                    else{
+                        putchar(variables_data_list[i][j]);
                     }
                 }
 
-                if (strlen(variable_name_buffer) == strlen(variables_name_list[i])){
-                    break;
-                }
-            }
-            
-            for (int j = 0; variables_data_list[i][j] != '\0'; j++){
-
-                if (variables_data_list[i][j] == '%'){
-                    putchar('\n');
-                }
-
-                else if (variables_data_list[i][j] == '#'){
-                    putchar('\t');
-                }
-
-                else{
-                    putchar(variables_data_list[i][j]);
-                }
+                break;
             }
         }
+
+        return true;
+    }
+
+    else{
+        return false;
     }
 }
 
 
 
-void INP_KEYWORD(char* code){
+bool INP_KEYWORD(char* code){
 
-    if (code[0] == 'i' && code[1] == 'n' && code[2] == 'p'){
+    if (code[0] == 'i' && code[1] == 'n' && code[2] == 'p' && code[3] == ' '){
 
         char variable_name_buffer[100];
         short variable_name_buffer_counter = 0;
 
-        int variable_name_counter = 3;
+        int variable_name_counter = 4;
 
         while (code[variable_name_counter] != ';'){
 
@@ -264,6 +257,12 @@ void INP_KEYWORD(char* code){
             variable_data_pointer[0] = '\0';
             fgets(variable_data_pointer, 99, stdin);
         }
+
+        return true;
+    }
+
+    else{
+        return false;
     }
 }
 
@@ -273,18 +272,25 @@ static bool cli_pause_mode = true;
 
 
 
-void END_KEYWORD(char* code){
-    if (code[0] == 'e' && code[1] == 'n' && code[2] == 'd'){
+bool END_KEYWORD(char* code){
+
+    if (code[0] == 'e' && code[1] == 'n' && code[2] == 'd' && code[3] == ';'){
         cli_pause_mode = false;
+        return true;
+    }
+
+    else{
+        return false;
     }
 }
+
 
 
 bool ENDLINE_CONTROL(char* code){
 
     bool string_literal_active = false;
 
-    for (int i = 0; i < strlen(code); i++){
+    for (int i = 0; code[i] != '\0' && code[i] != '\n'; i++){  //  i < strlen(code)
 
         if (code[i] == '"'){
 
@@ -301,6 +307,7 @@ bool ENDLINE_CONTROL(char* code){
 
     return false;
 }
+
 
 
 bool RUNTIME(FILE* ScriptFile){
@@ -322,21 +329,37 @@ bool RUNTIME(FILE* ScriptFile){
             
             // Əgər sətirdə sonlandırıcı yoxsa proqram dayandırılır false dönər.
             if (ENDLINE_CONTROL(code) == false) return false;
+
+            // Keywords RevanScript Control System
 	         
             // out açar sözünün işləndiyini yoxlayan funksiya
-	        OUT_KEYWORD(code);
+	        if (OUT_KEYWORD(code) == true){
+                free(code);
+                continue;
+            }
 	        
 	        // var açar sözü dəyishen yaratmaq üçündür
-	        VAR_KEYWORD(code);
+	        else if (VAR_KEYWORD(code) == true){
+                free(code);
+                continue;
+            }
             
             // inp açar sözü dəyişənə klaviyaturadan alınan mətni yazır
-            INP_KEYWORD(code);
+            else if (INP_KEYWORD(code) == true){
+                free(code);
+                continue;
+            }
 
             // end açar sözü pause modunu deaktiv edir.
-            END_KEYWORD(code);
-	        
-            // kodun olduğu yaddaşı azad edirik
-	        free(code);
+            else if (END_KEYWORD(code) == true){
+                free(code);
+                continue;
+            }
+
+            else{
+                // kodun olduğu yaddaşı azad edirik
+	            free(code);
+            }
 	    } 
         
         // NULL dırsa uğursuz yaddaş ayırması baş verib 
