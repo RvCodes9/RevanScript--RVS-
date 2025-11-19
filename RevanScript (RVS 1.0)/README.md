@@ -12,6 +12,8 @@ inp (input) - klaviyaturadan məlumat almaq üçün əsas açar sözdür.
 
 var (variable) - dəyişən yaratmaq və dəyər vermək üçün açar sözdür.
 
+prt (print) - string literalı ekrana çıxarmaq üçün açar sözdür.
+
 end - normalda proqram bitəndə terminal a pause verir ki cli ekran aktiv qalsın onu sonlandırmaq üçündür.
 
 -----------------------------------
