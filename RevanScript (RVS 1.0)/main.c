@@ -8,6 +8,7 @@ RevanScript interpreter C source codes
 */
 
 
+
 #include <stdio.h> // Standart input/output kitabxanasıdır (printf, fgets, puts, putchar) kimi funksiyalar üçün lazımdır.
 #include <stdlib.h> // Standart Library kitabxanasıdır (malloc, calloc, realloc, free, system) kimi yaddaş ı dinamik idarə edə bilmək üçün lazım olan funksiyalar var.
 #include <stdbool.h> // Standart Boolean kitabxanasıdır (true, false) daha rahat (1, 0) anlamını oxunaqlı hala gətirmək üçündür.
@@ -322,6 +323,61 @@ bool PRT_KEYWORD(char* code){
 }
 
 
+bool PLN_KEYWORD(char* code){
+
+    if (code[0] == 'p' && code[1] == 'l' && code[2] == 'n' && code[3] == ' '){
+
+        int code_counter = 4;
+
+        bool string_literal_active = false;
+
+        while (true){
+
+            if (code[code_counter] == '"'){
+
+                if (string_literal_active == false){
+                    string_literal_active = true;
+                }
+
+                else{
+                    string_literal_active = false;
+                }
+            }
+
+            else if (string_literal_active == true){
+                
+                if (code[code_counter] == '%'){
+                    putchar('\n');
+                }
+
+                else if (code[code_counter] == '#'){
+                    putchar('\t');
+                }
+
+                else{
+                    putchar(code[code_counter]);
+                }
+            }
+
+            else if (string_literal_active == false && code[code_counter] == ';'){
+                break;
+            }
+
+            code_counter++;
+
+        }
+
+        putchar('\n');
+
+        return true;
+    }
+
+    else{
+        return false;
+    }
+}
+
+
 static bool cli_pause_mode = true;
 
 
@@ -385,7 +441,7 @@ bool RUNTIME(FILE* ScriptFile){
 
             // Keywords RevanScript Control System
 	         
-            // out açar sözünün işləndiyini yoxlayan funksiya
+            // out açar sözü dəyişənin dəyərini çap etmək üçündür.
 	        if (OUT_KEYWORD(code) == true){
                 free(code);
                 continue;
@@ -402,8 +458,15 @@ bool RUNTIME(FILE* ScriptFile){
                 free(code);
                 continue;
             }
-
+            
+            // prt açar sözü string literalı ekrana çap edir.
             else if (PRT_KEYWORD(code) == true){
+                free(code);
+                continue;
+            }
+            
+            // pln açar sözü string litealı ekrana çap etdikdən sonra yeni sətrə keçir.
+            else if (PLN_KEYWORD(code) == true){
                 free(code);
                 continue;
             }
