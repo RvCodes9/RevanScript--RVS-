@@ -16,10 +16,12 @@ RevanScript interpreter C source codes
 #include <stdint.h> // Standart Integer kitabxanasıdır (int8_t, int16_t, int32_t, int64_t) kimi məlumat tipləri var.
 
 
+
 #define VARIABLE_NAME_MAX_COUNT 100 // Dəyişənin maksimum sayı
 #define VARIABLE_DATA_MAX_COUNT 100 // Dəyişəndəki məlumatın sayı
 #define VARIABLE_NAME_MAX_LENGHT 100 // Dəyişən adının uzunluğu
 #define VARIABLE_DATA_MAX_LENGHT 100 // Dəyişəndəki məlumatın uzunluğu
+
 
 
 bool ARG_CONTROL(int argc, char** argv){
@@ -267,9 +269,60 @@ bool INP_KEYWORD(char* code){
 }
 
 
+bool PRT_KEYWORD(char* code){
+
+    if (code[0] == 'p' && code[1] == 'r' && code[2] == 't' && code[3] == ' '){
+
+        int code_counter = 4;
+
+        bool string_literal_active = false;
+
+        while (true){
+
+            if (code[code_counter] == '"'){
+
+                if (string_literal_active == false){
+                    string_literal_active = true;
+                }
+
+                else{
+                    string_literal_active = false;
+                }
+            }
+
+            else if (string_literal_active == true){
+                
+                if (code[code_counter] == '%'){
+                    putchar('\n');
+                }
+
+                else if (code[code_counter] == '#'){
+                    putchar('\t');
+                }
+
+                else{
+                    putchar(code[code_counter]);
+                }
+            }
+
+            else if (string_literal_active == false && code[code_counter] == ';'){
+                break;
+            }
+
+            code_counter++;
+
+        }
+
+        return true;
+    }
+
+    else{
+        return false;
+    }
+}
+
 
 static bool cli_pause_mode = true;
-
 
 
 bool END_KEYWORD(char* code){
@@ -346,6 +399,11 @@ bool RUNTIME(FILE* ScriptFile){
             
             // inp açar sözü dəyişənə klaviyaturadan alınan mətni yazır
             else if (INP_KEYWORD(code) == true){
+                free(code);
+                continue;
+            }
+
+            else if (PRT_KEYWORD(code) == true){
                 free(code);
                 continue;
             }
