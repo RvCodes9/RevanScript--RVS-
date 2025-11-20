@@ -8,12 +8,15 @@ RevanScript interpreter C source codes
 */
 
 
+
+
 #include <stdio.h> // Standart input/output kitabxanasıdır (printf, fgets, puts, putchar) kimi funksiyalar üçün lazımdır.
 #include <stdlib.h> // Standart Library kitabxanasıdır (malloc, calloc, realloc, free, system) kimi yaddaş ı dinamik idarə edə bilmək üçün lazım olan funksiyalar var.
 #include <stdbool.h> // Standart Boolean kitabxanasıdır (true, false) daha rahat (1, 0) anlamını oxunaqlı hala gətirmək üçündür.
 #include <stddef.h> // Standart Define kitabxanasıdır (size_t) kimi içində bəzi məlumat tipləri var.
 #include <string.h> // String algorithms / alqoritimləri var.
 #include <stdint.h> // Standart Integer kitabxanasıdır (int8_t, int16_t, int32_t, int64_t) kimi məlumat tipləri var.
+
 
 
 
@@ -45,10 +48,13 @@ void CONSOLE_COLOR_ACTIVE(){
 
 
 
-#define VARIABLE_NAME_MAX_COUNT 100 // Dəyişənin maksimum sayı
-#define VARIABLE_DATA_MAX_COUNT 100 // Dəyişəndəki məlumatın sayı
+#define VARIABLE_NAME_MAX_COUNT 100  // Dəyişənin maksimum sayı
+#define VARIABLE_DATA_MAX_COUNT 100  // Dəyişəndəki məlumatın sayı
+#define VARIABLE_TYPE_MAX_COUNT 100  // Dəyişən tiplərinin maksimum sayı
+
 #define VARIABLE_NAME_MAX_LENGHT 100 // Dəyişən adının uzunluğu
 #define VARIABLE_DATA_MAX_LENGHT 100 // Dəyişəndəki məlumatın uzunluğu
+#define VARIABLE_TYPE_MAX_LENGHT 5   // Dəyişən tiplərinin uzunluğu
 
 
 
@@ -77,6 +83,7 @@ bool ARG_CONTROL(int argc, char** argv){
 
 static char variables_name_list[VARIABLE_NAME_MAX_COUNT][VARIABLE_NAME_MAX_LENGHT];
 static char variables_data_list[VARIABLE_DATA_MAX_COUNT][VARIABLE_DATA_MAX_LENGHT];
+static char variables_type_list[VARIABLE_TYPE_MAX_COUNT][VARIABLE_TYPE_MAX_LENGHT];
 
 static int variables_list_counter = 0;
 
@@ -90,9 +97,12 @@ bool VAR_KEYWORD(char* code){
 		
 		int n_counter = 0;
 		int d_counter = 0;
+        int8_t t_counter = 0;
 		
 		bool equal_active = false;
         bool string_literal_active = false;
+
+        bool string_type = false;
 		
 		while (true){
 			
@@ -112,6 +122,10 @@ bool VAR_KEYWORD(char* code){
 			}
 
             else if (equal_active == true && code[i] == '"'){
+
+                if (string_type == false){
+                    string_type = true;
+                }
 
                 if (string_literal_active == false){
                     string_literal_active = true;
@@ -140,17 +154,37 @@ bool VAR_KEYWORD(char* code){
 		}
 		
 		// Əgər dəyişənə dəyər verilməyibsə avtomatik NULL dəyəri alır
+
 		if (equal_active == false){
-			char null_data[5] = "NULL";
-			for (int j = 0; j < strlen(null_data); j++){
-				variables_data_list[variables_list_counter][d_counter++] = null_data[j];
+
+            char example_null_data[] = "NULL";
+
+			for (int j = 0; j < strlen(example_null_data); j++){
+				variables_data_list[variables_list_counter][d_counter++] = example_null_data[j];
+                variables_type_list[variables_list_counter][t_counter++] = example_null_data[j];
 			}
+
 		}
+
+        else{
+
+            if (string_type == true){
+
+                char example_string_type[] = "STR";
+
+                for (int j = 0; j < strlen(example_string_type); j++){
+                    variables_type_list[variables_list_counter][t_counter++] = example_string_type[j];
+                }
+
+            }
+
+        }
 		
         // Sonuna NULL TERMINATOR CHARACTER qoyulur (\0)
 		variables_name_list[variables_list_counter][n_counter] = '\0';
 		variables_data_list[variables_list_counter][d_counter] = '\0';
-
+        variables_type_list[variables_list_counter][t_counter] = '\0';
+        
 		variables_list_counter++;
 
         return true;
@@ -419,11 +453,24 @@ bool COL_KEYWORD(char* code){
             switch (code[i]){
 
                 case '0' : printf("%s", RESET); break;
+
                 case '1' : printf("%s", BLUE); break;
                 case '2' : printf("%s", RED); break;
                 case '3' : printf("%s", GREEN); break;
                 case '4' : printf("%s", YELLOW); break;
                 case '5' : printf("%s", WHITE); break;
+
+                case 'B' : printf("%s", BLUE); break;
+                case 'R' : printf("%s", RED); break;
+                case 'G' : printf("%s", GREEN); break;
+                case 'Y' : printf("%s", YELLOW); break;
+                case 'W' : printf("%s", WHITE); break;
+
+                case 'b' : printf("%s", BLUE); break;
+                case 'r' : printf("%s", RED); break;
+                case 'g' : printf("%s", GREEN); break;
+                case 'y' : printf("%s", YELLOW); break;
+                case 'w' : printf("%s", WHITE); break;
 
                 default : break;
 
@@ -442,7 +489,6 @@ bool COL_KEYWORD(char* code){
 
 
 static bool cli_pause_mode = true;
-
 
 bool END_KEYWORD(char* code){
 
