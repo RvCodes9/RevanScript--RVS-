@@ -57,24 +57,17 @@ void CONSOLE_COLOR_ACTIVE(){
 
 
 bool ARG_CONTROL(int argc, char** argv){
-
-    if (argc == 2){
         
-        size_t arglen = strlen(argv[1]);
+    size_t arglen = strlen(argv[1]);
 
-        char example[4] = ".rvs";
-        int8_t example_counter = 0;
-            
-        for (int i = (arglen - 4); i < arglen; i++){
-            if (example[example_counter++] != argv[1][i]) return false;
-        }
-
-        return true;
-    }  
-    
-    else{
-        return false;
+    char example[4] = ".rvs";
+    int8_t example_counter = 0;
+        
+    for (int i = (arglen - 4); i < arglen; i++){
+        if (example[example_counter++] != argv[1][i]) return false;
     }
+
+    return true;
 }
 
 
@@ -488,10 +481,14 @@ bool COL_KEYWORD(char* code){
 
 static bool cli_pause_mode = true;
 
-bool END_KEYWORD(char* code){
+bool END_KEYWORD(char* code, bool repl_active){
 
     if (code[0] == 'e' && code[1] == 'n' && code[2] == 'd' && code[3] == ';'){
-        cli_pause_mode = false;
+
+        if (repl_active == false){
+            cli_pause_mode = false;
+        }
+
         return true;
     }
 
@@ -526,10 +523,10 @@ bool ENDLINE_CONTROL(char* code){
 
 
 
-bool RUNTIME(FILE* ScriptFile){
+bool RUNTIME(FILE* ScriptFile, bool repl_active){
     
     // Əsas Runtime loop/Dövr
-    while (!feof(ScriptFile)){
+    while ((repl_active == false) ? (!feof(ScriptFile)) : true){
     	
         // kodu yaddaşda saxlamaq üçün code dəyişəni 2049 bayt ayırıram son bir bayt \0 (NULL TERMİNATOR CHARACTER) üçün
     	char* code = (char*) calloc(2049, 1);
@@ -537,8 +534,16 @@ bool RUNTIME(FILE* ScriptFile){
         // NULL deyilsə yaddaş ayırma uğurlu keçib anlamına gəlir
     	if (code != NULL){
             
-            // Fayldan kodu oxuyub code dəyişəninə yazıram maksimum 2 KB oyuyuram 
-	        fgets(code, 2048, ScriptFile);
+            if (repl_active == false){
+                // Fayldan kodu oxuyub code dəyişəninə yazıram maksimum 2 KB oxuyuram 
+	            fgets(code, 2048, ScriptFile);
+            }
+
+            else{
+                // Klaviyaturadan kodu oxuyub code dəyişəninə yazıram maksimum 2 KB oxuyuram
+                printf("%s>>> %s", GREEN, RESET);
+                fgets(code, 2048, stdin);
+            }
 	        
             // Sətir heç bir kod yoxsa
 	        if (code[0] == '\0' || code[0] == '\n') continue;
@@ -585,9 +590,9 @@ bool RUNTIME(FILE* ScriptFile){
             }
 
             // end açar sözü pause modunu deaktiv edir.
-            else if (END_KEYWORD(code) == true){
+            else if (END_KEYWORD(code, repl_active) == true){
                 free(code);
-                continue;
+                break;
             }
 
             else{
@@ -601,7 +606,7 @@ bool RUNTIME(FILE* ScriptFile){
     }
      
     // Ekranın proqram bitən kimi bağlanmasını əngəlləyir.
-    if (cli_pause_mode == true){
+    if (cli_pause_mode == true && repl_active == false){
         printf("\n");
         printf("%s", RESET);
         system("pause");
@@ -619,7 +624,7 @@ bool INTERPRETER(char* script_name){
     ScriptFile = fopen(script_name, "r");
 
     if (ScriptFile != NULL){
-        if (RUNTIME(ScriptFile) == false) return false;
+        if (RUNTIME(ScriptFile, false) == false) return false;
     } 
     
     else return false;
@@ -628,12 +633,33 @@ bool INTERPRETER(char* script_name){
 
 
 int main(int argc, char** argv){
-    
-    // .rvs file type control reader.
-    if (ARG_CONTROL(argc, argv) == false) return 1;
-    
-    // Interpreter 
-    if (INTERPRETER(argv[1]) == false) return 1;
+
+    if (argc == 2){
+
+        // .rvs file type control reader.
+        if (ARG_CONTROL(argc, argv) == true){
+            
+            // Interpreter 
+            if (INTERPRETER(argv[1]) == false){
+                return 0;
+            }
+
+        }
+
+        else {
+            return 1;
+        }
+
+    }
+
+    else if (argc == 1){
+
+        #ifdef _WIN32
+        CONSOLE_COLOR_ACTIVE();
+        #endif
+        printf("\n%sCopyright Revan Babayev All rights reserved.\n%sRevanScript (RVS 1.0) REPL / Interpreter%s\n\n", BLUE, YELLOW, RESET);
+        RUNTIME(NULL, true);
+    }
     
     // Problem yoxsa
     return 0;
