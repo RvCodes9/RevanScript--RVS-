@@ -9,14 +9,12 @@ RevanScript interpreter C source codes
 
 
 
-
 #include <stdio.h> // Standart input/output kitabxanasıdır (printf, fgets, puts, putchar) kimi funksiyalar üçün lazımdır.
 #include <stdlib.h> // Standart Library kitabxanasıdır (malloc, calloc, realloc, free, system) kimi yaddaş ı dinamik idarə edə bilmək üçün lazım olan funksiyalar var.
 #include <stdbool.h> // Standart Boolean kitabxanasıdır (true, false) daha rahat (1, 0) anlamını oxunaqlı hala gətirmək üçündür.
 #include <stddef.h> // Standart Define kitabxanasıdır (size_t) kimi içində bəzi məlumat tipləri var.
 #include <string.h> // String algorithms / alqoritimləri var.
 #include <stdint.h> // Standart Integer kitabxanasıdır (int8_t, int16_t, int32_t, int64_t) kimi məlumat tipləri var.
-
 
 
 
@@ -184,7 +182,7 @@ bool VAR_KEYWORD(char* code){
 		variables_name_list[variables_list_counter][n_counter] = '\0';
 		variables_data_list[variables_list_counter][d_counter] = '\0';
         variables_type_list[variables_list_counter][t_counter] = '\0';
-        
+
 		variables_list_counter++;
 
         return true;
