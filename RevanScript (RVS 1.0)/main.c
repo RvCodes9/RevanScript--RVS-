@@ -187,7 +187,7 @@ bool VAR_KEYWORD(char* code){
 }
 
 
-bool OUT_KEYWORD(char* code){
+bool OUT_KEYWORD(char* code, bool repl_active){
 
     if (code[0] == 'o' && code[1] == 'u' && code[2] == 't' && code[3] == ' '){
         
@@ -247,6 +247,10 @@ bool OUT_KEYWORD(char* code){
 
                 break;
             }
+        }
+
+        if (repl_active == true){
+            putchar('\n');
         }
 
         return true;
@@ -322,7 +326,7 @@ bool INP_KEYWORD(char* code){
 }
 
 
-bool PRT_KEYWORD(char* code){
+bool PRT_KEYWORD(char* code, bool repl_active){
 
     if (code[0] == 'p' && code[1] == 'r' && code[2] == 't' && code[3] == ' '){
 
@@ -366,6 +370,10 @@ bool PRT_KEYWORD(char* code){
 
         }
 
+        if (repl_active == true){
+            putchar('\n');
+        }
+
         return true;
     }
 
@@ -375,7 +383,7 @@ bool PRT_KEYWORD(char* code){
 }
 
 
-bool PLN_KEYWORD(char* code){
+bool PLN_KEYWORD(char* code, bool repl_active){
 
     if (code[0] == 'p' && code[1] == 'l' && code[2] == 'n' && code[3] == ' '){
 
@@ -420,6 +428,10 @@ bool PLN_KEYWORD(char* code){
         }
 
         putchar('\n');
+
+        if (repl_active == true){
+            putchar('\n');
+        }
 
         return true;
     }
@@ -554,7 +566,7 @@ bool RUNTIME(FILE* ScriptFile, bool repl_active){
             // Keywords RevanScript Control System
 	         
             // out açar sözü dəyişənin dəyərini çap etmək üçündür.
-	        if (OUT_KEYWORD(code) == true){
+	        if (OUT_KEYWORD(code, repl_active) == true){
                 free(code);
                 continue;
             }
@@ -572,13 +584,13 @@ bool RUNTIME(FILE* ScriptFile, bool repl_active){
             }
             
             // prt açar sözü string literalı ekrana çap edir.
-            else if (PRT_KEYWORD(code) == true){
+            else if (PRT_KEYWORD(code, repl_active) == true){
                 free(code);
                 continue;
             }
             
             // pln açar sözü string litealı ekrana çap etdikdən sonra yeni sətrə keçir.
-            else if (PLN_KEYWORD(code) == true){
+            else if (PLN_KEYWORD(code, repl_active) == true){
                 free(code);
                 continue;
             }
